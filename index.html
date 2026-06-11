@@ -163,6 +163,28 @@
 
   /* SAFE AREA BOTTOM */
   .nav{padding-bottom:env(safe-area-inset-bottom,0)}
+
+  /* ADMIN USERS PANEL */
+  .admin-user-card{background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;overflow:hidden}
+  .admin-user-header{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+  .admin-user-body{display:none;padding:0 12px 10px;border-top:1px solid var(--border)}
+  .admin-user-body.open{display:block}
+  .admin-pred-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .admin-pred-row:last-child{border-bottom:none}
+  .admin-pred-teams{flex:1;color:var(--text2)}
+  .admin-pred-score{font-weight:700;color:var(--green);min-width:44px;text-align:center}
+  .admin-pred-score.pending{color:var(--text3);font-weight:400;font-style:italic}
+  .admin-stats{display:flex;gap:6px;margin:8px 0 4px}
+  .admin-stat{flex:1;background:var(--card);border-radius:8px;padding:6px;text-align:center;border:1px solid var(--border)}
+  .admin-stat-val{font-size:15px;font-weight:700;color:var(--text)}
+  .admin-stat-lbl{font-size:10px;color:var(--text3);margin-top:1px}
+  .admin-role-badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600;margin-left:4px}
+  .role-admin{background:var(--gold-light);color:#8a6800}
+  .role-user{background:var(--green-light);color:var(--green)}
+  .chevron{transition:transform .2s;width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
+  .chevron.open{transform:rotate(180deg)}
+  .venue-text{font-size:10px;color:var(--text3);margin-top:1px}
+  .admin-section-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px}
 </style>
 </head>
 <body>
@@ -208,6 +230,10 @@
     <button class="nav-btn" onclick="showScreen('perfil',this)" aria-label="Perfil">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Perfil
+    </button>
+    <button class="nav-btn" id="navAdmin" style="display:none" onclick="showScreen('admin',this)" aria-label="Admin">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Admin
     </button>
   </nav>
 
@@ -380,6 +406,19 @@
       </div>
     </div>
 
+
+    <!-- ADMIN USERS -->
+    <div id="screen-admin" class="screen">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuarios registrados
+          <span id="userCountBadge" style="margin-left:auto;font-size:11px;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:700"></span>
+        </div>
+        <div id="adminUsersList"></div>
+      </div>
+    </div>
+
   </div><!-- /screens -->
 </div><!-- /app -->
 
@@ -387,13 +426,14 @@
 
 <script>
 // ─── DATA ───────────────────────────────────────────────────────────────
+// Horarios en CST (Honduras) = ET - 1 hora — verificados con calendario oficial FIFA 2026
 const MATCHES=[
-  {id:1,home:'México',away:'Sudáfrica',date:'11 jun',time:'13:00',group:'A'},
-  {id:2,home:'Corea del Sur',away:'Rep. Checa',date:'11 jun',time:'10:00',group:'A'},
-  {id:3,home:'México',away:'Corea del Sur',date:'15 jun',time:'19:00',group:'A'},
-  {id:4,home:'Rep. Checa',away:'Sudáfrica',date:'15 jun',time:'16:00',group:'A'},
-  {id:5,home:'México',away:'Rep. Checa',date:'19 jun',time:'20:00',group:'A'},
-  {id:6,home:'Sudáfrica',away:'Corea del Sur',date:'19 jun',time:'20:00',group:'A'},
+  {id:1,home:'México',away:'Sudáfrica',date:'11 jun',time:'14:00',group:'A',venue:'Estadio Azteca, CDMX'},
+  {id:2,home:'Corea del Sur',away:'Rep. Checa',date:'11 jun',time:'21:00',group:'A',venue:'Estadio Akron, Guadalajara'},
+  {id:3,home:'Rep. Checa',away:'Sudáfrica',date:'18 jun',time:'11:00',group:'A',venue:'Mercedes-Benz Stadium, Atlanta'},
+  {id:4,home:'México',away:'Corea del Sur',date:'18 jun',time:'20:00',group:'A',venue:'Estadio Akron, Guadalajara'},
+  {id:5,home:'Rep. Checa',away:'México',date:'24 jun',time:'20:00',group:'A',venue:'Estadio Azteca, CDMX'},
+  {id:6,home:'Sudáfrica',away:'Corea del Sur',date:'24 jun',time:'20:00',group:'A',venue:'Estadio BBVA, Monterrey'},
 ];
 const GROUPS={
   A:['México','Sudáfrica','Corea del Sur','Rep. Checa'],
@@ -424,7 +464,7 @@ let S={
   results:{},
   predictions:{},
   users:[
-    {id:'admin',name:'Admin Gym',pass:'3464',role:'admin',pts:0},
+    {id:'admin',name:'Admin Gym',pass:'504hn2026',role:'admin',pts:0},
     {id:'ivan',name:'Iván (Demo)',pass:'1234',role:'user',pts:0},
     {id:'carlos',name:'Carlos M.',pass:'1234',role:'user',pts:0},
   ],
@@ -446,6 +486,7 @@ function showScreen(name,btn){
   document.getElementById('screen-'+name).classList.add('active');
   if(btn)btn.classList.add('active');
   if(name==='grupos'){renderGroupTabs();renderGroupTable(S.activeGroup);}
+  if(name==='admin')renderAdminUsers();
   if(name==='quiniela')renderQuiniela();
   if(name==='bracket')renderBracket();
   if(name==='resultados')renderResults();
@@ -676,6 +717,7 @@ function updateProfileUI(){
     loggedOut.style.display='none';loggedIn.style.display='block';
     adminBadge.style.display=u.role==='admin'?'inline':'none';
     document.getElementById('headerSub').textContent=u.role==='admin'?'Panel de administrador':'Copa del Mundo FIFA 2026';
+    document.getElementById('navAdmin').style.display=u.role==='admin'?'flex':'none';
     const init=u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
     document.getElementById('profileAvatar').textContent=init;
     document.getElementById('profileName').textContent=u.name;
@@ -719,6 +761,84 @@ window.addEventListener('appinstalled',()=>{
   document.getElementById('installBanner').classList.add('hidden');
   showToast('¡App instalada con éxito! ⚽');
 });
+
+// ─── ADMIN USERS VIEW ────────────────────────────────────────────────────────
+function renderAdminUsers(){
+  const nonAdmins=S.users.filter(u=>u.role!=='admin');
+  document.getElementById('userCountBadge').textContent=nonAdmins.length+' usuarios';
+  if(!nonAdmins.length){
+    document.getElementById('adminUsersList').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">No hay usuarios registrados aún</div>';
+    return;
+  }
+  const sorted=[...nonAdmins].sort((a,b)=>b.pts-a.pts);
+  let html='';
+  sorted.forEach((u,idx)=>{
+    const init=u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    const preds=S.predictions[u.id]||{};
+    const predCount=Object.keys(preds).length;
+    let hits=0,total=0;
+    MATCHES.forEach(m=>{
+      const r=S.results[m.id];
+      const p=preds[m.id];
+      if(r&&p){total++;if(r.h===p.h&&r.a===p.a)hits++;}
+    });
+    const medals=['🥇','🥈','🥉'];
+    const rankLabel=medals[idx]||(idx+1)+'°';
+
+    // Build predictions rows
+    let predRows='';
+    MATCHES.forEach(m=>{
+      const p=preds[m.id];
+      const r=S.results[m.id];
+      let scoreHtml,resultIcon='';
+      if(p){
+        scoreHtml=`<span class="admin-pred-score">${p.h} - ${p.a}</span>`;
+        if(r){
+          const rd=r.h-r.a,pd=p.h-p.a;
+          if(r.h===p.h&&r.a===p.a) resultIcon='<span style="color:var(--green);font-size:11px">+3✓</span>';
+          else if((rd>0&&pd>0)||(rd<0&&pd<0)||(rd===0&&pd===0)) resultIcon='<span style="color:var(--gold);font-size:11px">+1~</span>';
+          else resultIcon='<span style="color:var(--red);font-size:11px">+0✗</span>';
+        }
+      } else {
+        scoreHtml='<span class="admin-pred-score pending">sin pick</span>';
+      }
+      predRows+=`<div class="admin-pred-row">
+        <span class="admin-pred-teams">${m.home} vs ${m.away}</span>
+        ${scoreHtml}
+        ${resultIcon}
+      </div>`;
+    });
+
+    html+=`<div class="admin-user-card">
+      <div class="admin-user-header" onclick="toggleAdminUser('u${u.id}')">
+        <div class="avatar" style="width:34px;height:34px;font-size:12px">${init}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${rankLabel} ${u.name}</div>
+          <div class="venue-text">@${u.id} · ${predCount}/6 predicciones</div>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:var(--green)">${u.pts} pts</span>
+        <svg class="chevron" id="chev_u${u.id}" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="admin-user-body" id="body_u${u.id}">
+        <div class="admin-stats">
+          <div class="admin-stat"><div class="admin-stat-val">${predCount}</div><div class="admin-stat-lbl">Picks</div></div>
+          <div class="admin-stat"><div class="admin-stat-val" style="color:var(--green)">${hits}</div><div class="admin-stat-lbl">Exactos</div></div>
+          <div class="admin-stat"><div class="admin-stat-val" style="color:var(--gold)">${u.pts}</div><div class="admin-stat-lbl">Puntos</div></div>
+        </div>
+        <div class="admin-section-title">Predicciones partido a partido</div>
+        ${predRows}
+      </div>
+    </div>`;
+  });
+  document.getElementById('adminUsersList').innerHTML=html;
+}
+
+function toggleAdminUser(id){
+  const body=document.getElementById('body_'+id);
+  const chev=document.getElementById('chev_'+id);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
 
 // ─── INIT ────────────────────────────────────────────────────────────────
 loadState();
