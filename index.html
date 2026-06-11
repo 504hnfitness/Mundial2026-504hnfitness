@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a6b3a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="504HN Mundial">
+<meta name="description" content="Quiniela y resultados del Mundial 2026 — Gym 504HN Fitness">
+<title>504HN Fitness — Mundial 2026</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f0}
+  :root{
+    --green:#1a6b3a;--green-dark:#145530;--green-light:#e8f5e9;
+    --gold:#e8b800;--gold-light:#fff8e1;
+    --red:#c0392b;--red-light:#ffebee;
+    --bg:#f0f2f0;--card:#fff;--border:#e0e0e0;
+    --text:#1a1a1a;--text2:#555;--text3:#999;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#121212;--card:#1e1e1e;--border:#333;--text:#f0f0f0;--text2:#aaa;--text3:#666}
+  }
+
+  /* APP SHELL */
+  #app{display:flex;flex-direction:column;height:100vh;height:100dvh;max-width:480px;margin:0 auto;background:var(--bg)}
+  .header{background:var(--green);color:#fff;padding:env(safe-area-inset-top,0) 0 0;flex-shrink:0}
+  .header-inner{display:flex;align-items:center;gap:10px;padding:12px 16px 10px}
+  .logo-circle{width:40px;height:40px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:9px;color:#1a3a1a;flex-shrink:0;text-align:center;line-height:1.15}
+  .header-title{font-size:16px;font-weight:600;color:#fff}
+  .header-sub{font-size:11px;color:rgba(255,255,255,.7);margin-top:1px}
+  .admin-badge{font-size:9px;background:rgba(255,255,255,.2);color:#fff;padding:2px 6px;border-radius:8px;margin-left:6px;vertical-align:middle}
+
+  .nav{display:flex;background:var(--green-dark);border-bottom:2px solid var(--gold);flex-shrink:0}
+  .nav-btn{flex:1;padding:8px 2px 6px;background:none;border:none;color:rgba(255,255,255,.55);font-size:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1;transition:color .15s;border-bottom:2px solid transparent;margin-bottom:-2px}
+  .nav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+  .nav-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+  /* SCREENS */
+  .screens{flex:1;overflow:hidden;position:relative}
+  .screen{position:absolute;inset:0;overflow-y:auto;padding:12px;display:none;-webkit-overflow-scrolling:touch}
+  .screen.active{display:block}
+
+  /* CARDS */
+  .card{background:var(--card);border-radius:14px;border:1px solid var(--border);padding:12px 14px;margin-bottom:10px}
+  .card-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.4px}
+  .card-title svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;flex-shrink:0}
+
+  /* MATCHES */
+  .match-row{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .match-row:last-child{border-bottom:none}
+  .team{flex:1;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .team.away{text-align:right}
+  .score-area{display:flex;align-items:center;gap:4px;flex-shrink:0}
+  .score-input{width:36px;height:32px;text-align:center;font-size:16px;font-weight:700;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);-moz-appearance:textfield}
+  .score-input::-webkit-inner-spin-button,.score-input::-webkit-outer-spin-button{-webkit-appearance:none}
+  .score-sep{font-size:18px;font-weight:700;color:var(--text2)}
+  .score-display{display:flex;align-items:center;gap:4px}
+  .score-num{font-size:18px;font-weight:700;color:var(--text);min-width:20px;text-align:center}
+  .match-meta{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;white-space:nowrap;flex-shrink:0}
+  .meta-pending{background:var(--gold-light);color:#8a6800}
+  .meta-done{background:var(--green-light);color:var(--green)}
+  .meta-live{background:var(--red-light);color:var(--red)}
+
+  /* GROUPS TABLE */
+  .tab-group{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+  .tab-btn{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+  .tab-btn.active{background:var(--green);color:#fff;border-color:var(--green)}
+  .standings-table{width:100%;border-collapse:collapse;font-size:12px}
+  .standings-table th{color:var(--text2);font-weight:600;padding:4px 6px;text-align:center;border-bottom:1px solid var(--border);font-size:11px}
+  .standings-table th:first-child{text-align:left}
+  .standings-table td{padding:7px 6px;text-align:center;color:var(--text);border-bottom:1px solid var(--border)}
+  .standings-table td:first-child{text-align:left;font-weight:600}
+  .standings-table tr:last-child td{border-bottom:none}
+  .pos-dot{display:inline-block;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;line-height:18px;text-align:center;margin-right:4px}
+  .pos-top{background:var(--green-light);color:var(--green)}
+  .pos-mid{background:var(--gold-light);color:#8a6800}
+  .pos-bot{background:#f5f5f5;color:var(--text3)}
+
+  /* QUINIELA */
+  .leader-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+  .leader-row:last-child{border-bottom:none}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--green);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+  .leader-name{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+  .leader-pts{font-size:13px;font-weight:700;color:var(--green)}
+  .rank-num{font-size:11px;color:var(--text3);width:18px;text-align:center;font-weight:600}
+  .medal-1{color:var(--gold);font-size:14px}
+  .medal-2{color:#aaa;font-size:14px}
+  .medal-3{color:#c87533;font-size:14px}
+
+  .pred-row{display:flex;align-items:center;gap:4px;padding:7px 0;border-bottom:1px solid var(--border)}
+  .pred-row:last-child{border-bottom:none}
+  .pred-team{flex:1;font-size:11px;color:var(--text);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pred-team.right{text-align:right}
+  .pred-input{width:30px;height:28px;text-align:center;font-size:13px;font-weight:700;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);-moz-appearance:textfield}
+  .pred-input::-webkit-inner-spin-button,.pred-input::-webkit-outer-spin-button{-webkit-appearance:none}
+  .pred-result{font-size:10px;padding:1px 5px;border-radius:8px;flex-shrink:0}
+  .pred-exact{background:var(--green-light);color:var(--green)}
+  .pred-partial{background:var(--gold-light);color:#8a6800}
+  .pred-wrong{background:var(--red-light);color:var(--red)}
+
+  /* BRACKET */
+  .bracket-section{margin-bottom:8px}
+  .bracket-label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .bracket-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .bracket-match{background:var(--bg);border-radius:10px;padding:8px 10px;border:1px solid var(--border)}
+  .bracket-team{font-size:12px;font-weight:600;color:var(--text);padding:2px 0}
+  .bracket-vs{font-size:10px;color:var(--text3);text-align:center;padding:1px 0}
+  .bracket-winner{color:var(--green)}
+  .bracket-score{font-size:10px;color:var(--text3)}
+
+  /* LOGIN */
+  .login-wrap{padding:20px 0}
+  .login-logo{text-align:center;margin-bottom:24px}
+  .login-icon{width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:var(--gold);font-size:13px;font-weight:700;text-align:center;line-height:1.2}
+  .login-title{font-size:20px;font-weight:700;color:var(--text)}
+  .login-sub{font-size:13px;color:var(--text2);margin-top:4px}
+  .form-group{margin-bottom:14px}
+  .form-label{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block}
+  .form-input{width:100%;padding:11px 14px;border-radius:10px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:15px;outline:none;transition:border-color .15s;-webkit-appearance:none}
+  .form-input:focus{border-color:var(--green)}
+  .btn-primary{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .15s;margin-top:4px}
+  .btn-primary:active{opacity:.85}
+  .btn-secondary{width:100%;padding:11px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+  .btn-link{background:none;border:none;color:var(--green);font-size:13px;cursor:pointer;font-weight:600;padding:0}
+  .register-link{text-align:center;margin-top:16px;font-size:13px;color:var(--text2)}
+
+  /* PROFILE */
+  .profile-avatar{width:60px;height:60px;border-radius:50%;background:var(--green);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+  .stat-card{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+  .stat-val{font-size:22px;font-weight:700;color:var(--text)}
+  .stat-label{font-size:11px;color:var(--text2);margin-top:2px}
+
+  /* SAVE BTN */
+  .btn-save{width:100%;padding:11px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+  .btn-save:active{opacity:.85}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);left:50%;transform:translateX(-50%) translateY(20px);background:#222;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:all .25s;pointer-events:none;z-index:999;white-space:nowrap;max-width:90vw}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* INSTALL BANNER */
+  .install-banner{background:var(--green-dark);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;font-size:12px;flex-shrink:0}
+  .install-banner.hidden{display:none}
+  .btn-install{background:var(--gold);color:#1a3a1a;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+  .btn-dismiss{background:none;border:none;color:rgba(255,255,255,.6);font-size:18px;cursor:pointer;padding:0 4px;margin-left:auto}
+
+  /* EMPTY STATE */
+  .empty-state{text-align:center;padding:32px 20px;color:var(--text2)}
+  .empty-state svg{width:48px;height:48px;stroke:var(--text3);fill:none;stroke-width:1.5;margin-bottom:12px}
+  .empty-state h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px}
+  .empty-state p{font-size:13px;line-height:1.5}
+
+  .points-badge{font-size:11px;background:var(--green-light);color:var(--green);padding:3px 8px;border-radius:10px;font-weight:700}
+
+  /* DIVIDER */
+  .divider{height:1px;background:var(--border);margin:4px 0}
+
+  /* SAFE AREA BOTTOM */
+  .nav{padding-bottom:env(safe-area-inset-bottom,0)}
+
+  /* ADMIN USERS PANEL */
+  .admin-user-card{background:var(--bg);border-radius:10px;border:1px solid var(--border);margin-bottom:8px;overflow:hidden}
+  .admin-user-header{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}
+  .admin-user-body{display:none;padding:0 12px 10px;border-top:1px solid var(--border)}
+  .admin-user-body.open{display:block}
+  .admin-pred-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+  .admin-pred-row:last-child{border-bottom:none}
+  .admin-pred-teams{flex:1;color:var(--text2)}
+  .admin-pred-score{font-weight:700;color:var(--green);min-width:44px;text-align:center}
+  .admin-pred-score.pending{color:var(--text3);font-weight:400;font-style:italic}
+  .admin-stats{display:flex;gap:6px;margin:8px 0 4px}
+  .admin-stat{flex:1;background:var(--card);border-radius:8px;padding:6px;text-align:center;border:1px solid var(--border)}
+  .admin-stat-val{font-size:15px;font-weight:700;color:var(--text)}
+  .admin-stat-lbl{font-size:10px;color:var(--text3);margin-top:1px}
+  .admin-role-badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:600;margin-left:4px}
+  .role-admin{background:var(--gold-light);color:#8a6800}
+  .role-user{background:var(--green-light);color:var(--green)}
+  .chevron{transition:transform .2s;width:16px;height:16px;stroke:var(--text3);fill:none;stroke-width:2;flex-shrink:0}
+  .chevron.open{transform:rotate(180deg)}
+  .venue-text{font-size:10px;color:var(--text3);margin-top:1px}
+  .admin-section-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin:8px 0 4px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- INSTALL BANNER -->
+  <div class="install-banner hidden" id="installBanner">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    <span>Instala la app en tu celular</span>
+    <button class="btn-install" id="btnInstall">Instalar</button>
+    <button class="btn-dismiss" id="btnDismiss">×</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="logo-circle">504HN<br>FIT</div>
+      <div>
+        <div class="header-title">Mundial 2026 <span class="admin-badge" id="adminBadge" style="display:none">ADMIN</span></div>
+        <div class="header-sub" id="headerSub">Copa del Mundo FIFA 2026</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showScreen('resultados',this)" aria-label="Resultados">
+      <svg viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      Resultados
+    </button>
+    <button class="nav-btn" onclick="showScreen('grupos',this)" aria-label="Grupos">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+      Grupos
+    </button>
+    <button class="nav-btn" onclick="showScreen('quiniela',this)" aria-label="Quiniela">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Quiniela
+    </button>
+    <button class="nav-btn" onclick="showScreen('bracket',this)" aria-label="Bracket">
+      <svg viewBox="0 0 24 24"><path d="M8 6h8M8 12h4M8 18h2M4 6v12M12 12v6"/></svg>
+      Bracket
+    </button>
+    <button class="nav-btn" onclick="showScreen('perfil',this)" aria-label="Perfil">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Perfil
+    </button>
+    <button class="nav-btn" id="navAdmin" style="display:none" onclick="showScreen('admin',this)" aria-label="Admin">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Admin
+    </button>
+  </nav>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- RESULTADOS -->
+    <div id="screen-resultados" class="screen active">
+      <div id="adminPanel" style="display:none">
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Ingresar resultados <span style="margin-left:4px;font-size:10px;background:var(--gold-light);color:#8a6800;padding:2px 7px;border-radius:8px">Admin</span>
+          </div>
+          <div id="matchInputs"></div>
+          <button class="btn-save" onclick="saveResults()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar resultados
+          </button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Grupo A — Partidos
+        </div>
+        <div id="matchDisplay"></div>
+      </div>
+    </div>
+
+    <!-- GRUPOS -->
+    <div id="screen-grupos" class="screen">
+      <div class="tab-group" id="groupTabs"></div>
+      <div class="card">
+        <div id="groupTableContainer"></div>
+      </div>
+      <div class="card" style="font-size:12px;color:var(--text2);padding:10px 14px">
+        <b style="color:var(--green)">●</b> Clasifican a octavos &nbsp;|&nbsp; PJ=jugados &nbsp; GF=favor &nbsp; GC=contra &nbsp; Pts=puntos
+      </div>
+    </div>
+
+    <!-- QUINIELA -->
+    <div id="screen-quiniela" class="screen">
+      <div id="quinielaNonLogged" style="display:none">
+        <div class="card">
+          <div class="empty-state">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <h3>Inicia sesión para participar</h3>
+            <p>Regístrate y haz tus predicciones para competir con los demás miembros del gym</p>
+          </div>
+          <button class="btn-primary" style="margin-top:0" onclick="showScreen('perfil',document.querySelectorAll('.nav-btn')[4])">Iniciar sesión / Registrarse</button>
+        </div>
+      </div>
+      <div id="quinielaLogged" style="display:none">
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            Clasificación del gym
+          </div>
+          <div id="leaderboard"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Mis predicciones
+          </div>
+          <p style="font-size:11px;color:var(--text2);margin-bottom:8px">3 pts = resultado exacto · 1 pt = ganador/empate correcto</p>
+          <div id="myPredictions"></div>
+          <button class="btn-save" onclick="savePredictions()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Guardar mis picks
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRACKET -->
+    <div id="screen-bracket" class="screen">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24"><path d="M8 6h8M8 12h4M8 18h2M4 6v12M12 12v6"/></svg>
+          Fase eliminatoria — Mundial 2026
+        </div>
+        <div class="bracket-section">
+          <div class="bracket-label">Octavos de final</div>
+          <div id="bracket16" class="bracket-grid"></div>
+        </div>
+        <div class="bracket-section" style="margin-top:12px">
+          <div class="bracket-label">Cuartos de final</div>
+          <div id="bracket8" class="bracket-grid"></div>
+        </div>
+        <div class="bracket-section" style="margin-top:12px">
+          <div class="bracket-label">Semifinales</div>
+          <div id="bracket4" class="bracket-grid"></div>
+        </div>
+        <div class="bracket-section" style="margin-top:12px">
+          <div class="bracket-label" style="color:var(--gold)">Final — Nueva York</div>
+          <div id="bracketFinal"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div id="screen-perfil" class="screen">
+      <div id="profileLoggedOut">
+        <div class="card login-wrap">
+          <div class="login-logo">
+            <div class="login-icon">504HN<br>FIT</div>
+            <div class="login-title">Bienvenido</div>
+            <div class="login-sub">Mundial 2026 — Gym 504HN Fitness</div>
+          </div>
+          <div id="loginForm">
+            <div class="form-group">
+              <label class="form-label">Usuario</label>
+              <input class="form-input" type="text" id="loginUser" placeholder="tu_usuario" autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña</label>
+              <input class="form-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button class="btn-primary" onclick="doLogin()">Entrar</button>
+            <div class="register-link">¿No tienes cuenta? <button class="btn-link" onclick="showRegister()">Regístrate aquí</button></div>
+          </div>
+          <div id="registerForm" style="display:none">
+            <div class="form-group">
+              <label class="form-label">Nombre completo</label>
+              <input class="form-input" type="text" id="regName" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Usuario</label>
+              <input class="form-input" type="text" id="regUser" placeholder="elige_un_usuario" autocomplete="username">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contraseña</label>
+              <input class="form-input" type="password" id="regPass" placeholder="••••••••" autocomplete="new-password">
+            </div>
+            <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
+            <button class="btn-secondary" onclick="showLogin()">← Volver al login</button>
+          </div>
+        </div>
+      </div>
+      <div id="profileLoggedIn" style="display:none">
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div class="profile-avatar" id="profileAvatar"></div>
+            <div style="flex:1">
+              <div style="font-size:17px;font-weight:700;color:var(--text)" id="profileName"></div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px" id="profileRole"></div>
+            </div>
+            <span class="points-badge" id="profilePts">0 pts</span>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-val" id="statPred">0</div><div class="stat-label">Predicciones</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:var(--green)" id="statHits">0</div><div class="stat-label">Aciertos</div></div>
+            <div class="stat-card"><div class="stat-val" style="color:var(--gold)" id="statRank">#-</div><div class="stat-label">Posición</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+            Configuración
+          </div>
+          <button onclick="doLogout()" style="width:100%;padding:10px;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text2);font-size:14px;font-weight:600;cursor:pointer">
+            Cerrar sesión
+          </button>
+        </div>
+        <div class="card" style="text-align:center;padding:16px;font-size:12px;color:var(--text3)">
+          504HN Fitness · Mundial 2026 · v1.0
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ADMIN USERS -->
+    <div id="screen-admin" class="screen">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuarios registrados
+          <span id="userCountBadge" style="margin-left:auto;font-size:11px;background:var(--green-light);color:var(--green);padding:2px 8px;border-radius:10px;font-weight:700"></span>
+        </div>
+        <div id="adminUsersList"></div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+// Horarios en CST (Honduras) = ET - 1 hora — verificados con calendario oficial FIFA 2026
+const MATCHES=[
+  {id:1,home:'México',away:'Sudáfrica',date:'11 jun',time:'14:00',group:'A',venue:'Estadio Azteca, CDMX'},
+  {id:2,home:'Corea del Sur',away:'Rep. Checa',date:'11 jun',time:'21:00',group:'A',venue:'Estadio Akron, Guadalajara'},
+  {id:3,home:'Rep. Checa',away:'Sudáfrica',date:'18 jun',time:'11:00',group:'A',venue:'Mercedes-Benz Stadium, Atlanta'},
+  {id:4,home:'México',away:'Corea del Sur',date:'18 jun',time:'20:00',group:'A',venue:'Estadio Akron, Guadalajara'},
+  {id:5,home:'Rep. Checa',away:'México',date:'24 jun',time:'20:00',group:'A',venue:'Estadio Azteca, CDMX'},
+  {id:6,home:'Sudáfrica',away:'Corea del Sur',date:'24 jun',time:'20:00',group:'A',venue:'Estadio BBVA, Monterrey'},
+];
+const GROUPS={
+  A:['México','Sudáfrica','Corea del Sur','Rep. Checa'],
+  B:['EEUU','Brasil','Ghana','Uruguay'],
+  C:['Argentina','Francia','Australia','Senegal'],
+  D:['España','Alemania','Japón','Marruecos'],
+  E:['Portugal','Bélgica','Túnez','Qatar'],
+  F:['Inglaterra','Países Bajos','Ecuador','Camerún'],
+  G:['Italia','Croatia','México B','Egipto'],
+  H:['Polonia','Colombia','Suiza','Costa Rica'],
+};
+const BRACKET16=[
+  {home:'1A',away:'2B'},{home:'1B',away:'2A'},
+  {home:'1C',away:'2D'},{home:'1D',away:'2C'},
+  {home:'1E',away:'2F'},{home:'1F',away:'2E'},
+  {home:'1G',away:'2H'},{home:'1H',away:'2G'},
+];
+const BRACKET8=[
+  {home:'G1/G2',away:'G3/G4'},{home:'G5/G6',away:'G7/G8'},
+  {home:'G9/G10',away:'G11/G12'},{home:'G13/G14',away:'G15/G16'},
+];
+const BRACKET4=[
+  {home:'CF1/CF2',away:'CF3/CF4'},{home:'CF5/CF6',away:'CF7/CF8'},
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────
+let S={
+  results:{},
+  predictions:{},
+  users:[
+    {id:'admin',name:'Admin Gym',pass:'504hn2026',role:'admin',pts:0},
+    {id:'ivan',name:'Iván (Demo)',pass:'1234',role:'user',pts:0},
+    {id:'carlos',name:'Carlos M.',pass:'1234',role:'user',pts:0},
+  ],
+  currentUser:null,
+  activeGroup:'A',
+};
+
+function loadState(){
+  try{const s=localStorage.getItem('mundial504_v1');if(s){const p=JSON.parse(s);S.results=p.results||{};S.predictions=p.predictions||{};S.users=p.users||S.users;const cu=p.currentUserId;if(cu)S.currentUser=S.users.find(u=>u.id===cu)||null;}}catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem('mundial504_v1',JSON.stringify({results:S.results,predictions:S.predictions,users:S.users,currentUserId:S.currentUser?S.currentUser.id:null}));}catch(e){}
+}
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────────
+function showScreen(name,btn){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='grupos'){renderGroupTabs();renderGroupTable(S.activeGroup);}
+  if(name==='admin')renderAdminUsers();
+  if(name==='quiniela')renderQuiniela();
+  if(name==='bracket')renderBracket();
+  if(name==='resultados')renderResults();
+}
+
+// ─── RESULTS ────────────────────────────────────────────────────────────
+function renderResults(){
+  const isAdmin=S.currentUser&&S.currentUser.role==='admin';
+  document.getElementById('adminPanel').style.display=isAdmin?'block':'none';
+  if(isAdmin){
+    let h='';
+    MATCHES.forEach(m=>{
+      const r=S.results[m.id]||{};
+      h+=`<div class="match-row">
+        <span class="team">${m.home}</span>
+        <div class="score-area">
+          <input class="score-input" type="number" min="0" max="20" value="${r.h??''}" id="hi${m.id}" placeholder="0">
+          <span class="score-sep">-</span>
+          <input class="score-input" type="number" min="0" max="20" value="${r.a??''}" id="ai${m.id}" placeholder="0">
+        </div>
+        <span class="team away">${m.away}</span>
+      </div>`;
+    });
+    document.getElementById('matchInputs').innerHTML=h;
+  }
+  let d='';
+  MATCHES.forEach(m=>{
+    const r=S.results[m.id];
+    const meta=r
+      ?`<span class="match-meta meta-done">Final</span>`
+      :`<span class="match-meta meta-pending">${m.date} ${m.time}</span>`;
+    const scoreArea=r
+      ?`<div class="score-display"><span class="score-num">${r.h}</span><span class="score-sep" style="font-size:14px">-</span><span class="score-num">${r.a}</span></div>`
+      :`<span style="font-size:12px;color:var(--text3);padding:0 6px">VS</span>`;
+    d+=`<div class="match-row"><span class="team" style="font-size:12px">${m.home}</span>${scoreArea}<span class="team away" style="font-size:12px">${m.away}</span>${meta}</div>`;
+  });
+  document.getElementById('matchDisplay').innerHTML=d;
+}
+
+function saveResults(){
+  MATCHES.forEach(m=>{
+    const hi=document.getElementById('hi'+m.id);
+    const ai=document.getElementById('ai'+m.id);
+    if(hi&&ai&&hi.value!==''&&ai.value!==''){
+      S.results[m.id]={h:parseInt(hi.value),a:parseInt(ai.value)};
+    }
+  });
+  calcPoints();
+  saveState();
+  renderResults();
+  showToast('Resultados guardados ✓');
+}
+
+// ─── STANDINGS ──────────────────────────────────────────────────────────
+function getStandings(grp){
+  const teams={};
+  GROUPS[grp].forEach(t=>{teams[t]={name:t,pts:0,gf:0,ga:0,played:0}});
+  MATCHES.filter(m=>m.group===grp).forEach(m=>{
+    const r=S.results[m.id];if(!r)return;
+    if(!teams[m.home]||!teams[m.away])return;
+    teams[m.home].played++;teams[m.away].played++;
+    teams[m.home].gf+=r.h;teams[m.home].ga+=r.a;
+    teams[m.away].gf+=r.a;teams[m.away].ga+=r.h;
+    if(r.h>r.a)teams[m.home].pts+=3;
+    else if(r.h<r.a)teams[m.away].pts+=3;
+    else{teams[m.home].pts+=1;teams[m.away].pts+=1;}
+  });
+  return Object.values(teams).sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga));
+}
+
+function renderGroupTabs(){
+  const grps=Object.keys(GROUPS);
+  let h='';
+  grps.forEach(g=>{
+    h+=`<button class="tab-btn${g===S.activeGroup?' active':''}" onclick="switchGroup('${g}',this)">Grupo ${g}</button>`;
+  });
+  document.getElementById('groupTabs').innerHTML=h;
+}
+
+function renderGroupTable(grp){
+  const st=getStandings(grp);
+  let h=`<table class="standings-table"><thead><tr><th>Equipo</th><th>PJ</th><th>GF</th><th>GC</th><th>Pts</th></tr></thead><tbody>`;
+  st.forEach((t,i)=>{
+    const cls=i<2?'pos-top':i===2?'pos-mid':'pos-bot';
+    h+=`<tr><td><span class="pos-dot ${cls}">${i+1}</span>${t.name}</td><td>${t.played}</td><td>${t.gf}</td><td>${t.ga}</td><td style="font-weight:700">${t.pts}</td></tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('groupTableContainer').innerHTML=h;
+}
+
+function switchGroup(g,btn){
+  S.activeGroup=g;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGroupTable(g);
+}
+
+// ─── QUINIELA ───────────────────────────────────────────────────────────
+function calcPoints(){
+  S.users.forEach(u=>{
+    if(u.role==='admin'){u.pts=0;return;}
+    let pts=0;
+    const preds=S.predictions[u.id]||{};
+    Object.keys(preds).forEach(mid=>{
+      const r=S.results[mid];const p=preds[mid];
+      if(!r)return;
+      const rd=r.h-r.a,pd=p.h-p.a;
+      if(r.h===p.h&&r.a===p.a)pts+=3;
+      else if((rd>0&&pd>0)||(rd<0&&pd<0)||(rd===0&&pd===0))pts+=1;
+    });
+    u.pts=pts;
+  });
+}
+
+function renderQuiniela(){
+  if(!S.currentUser){
+    document.getElementById('quinielaNonLogged').style.display='block';
+    document.getElementById('quinielaLogged').style.display='none';
+    return;
+  }
+  document.getElementById('quinielaNonLogged').style.display='none';
+  document.getElementById('quinielaLogged').style.display='block';
+
+  const sorted=[...S.users].filter(u=>u.role!=='admin').sort((a,b)=>b.pts-a.pts);
+  const medals=['🥇','🥈','🥉'];
+  let lb='';
+  sorted.forEach((u,i)=>{
+    const init=u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    lb+=`<div class="leader-row">
+      <span class="rank-num">${medals[i]||i+1}</span>
+      <div class="avatar">${init}</div>
+      <span class="leader-name">${u.name}</span>
+      <span class="leader-pts">${u.pts} pts</span>
+    </div>`;
+  });
+  document.getElementById('leaderboard').innerHTML=lb;
+
+  const uid=S.currentUser.id;
+  const myP=S.predictions[uid]||{};
+  let pm='';
+  MATCHES.forEach(m=>{
+    const ph=myP[m.id]?.h??'';
+    const pa=myP[m.id]?.a??'';
+    const r=S.results[m.id];
+    let badge='';
+    if(r&&ph!==''&&pa!==''){
+      const rd=r.h-r.a,pd=ph-pa;
+      if(r.h===parseInt(ph)&&r.a===parseInt(pa))badge='<span class="pred-result pred-exact">+3</span>';
+      else if((rd>0&&pd>0)||(rd<0&&pd<0)||(rd===0&&pd===0))badge='<span class="pred-result pred-partial">+1</span>';
+      else badge='<span class="pred-result pred-wrong">+0</span>';
+    }
+    pm+=`<div class="pred-row">
+      <span class="pred-team">${m.home}</span>
+      <input class="pred-input" type="number" min="0" max="20" value="${ph}" id="ph${m.id}" placeholder="-">
+      <span class="score-sep" style="font-size:13px">-</span>
+      <input class="pred-input" type="number" min="0" max="20" value="${pa}" id="pa${m.id}" placeholder="-">
+      <span class="pred-team right">${m.away}</span>
+      ${badge}
+    </div>`;
+  });
+  document.getElementById('myPredictions').innerHTML=pm;
+}
+
+function savePredictions(){
+  if(!S.currentUser)return;
+  const uid=S.currentUser.id;
+  if(!S.predictions[uid])S.predictions[uid]={};
+  MATCHES.forEach(m=>{
+    const ph=document.getElementById('ph'+m.id);
+    const pa=document.getElementById('pa'+m.id);
+    if(ph&&pa&&ph.value!==''&&pa.value!==''){
+      S.predictions[uid][m.id]={h:parseInt(ph.value),a:parseInt(pa.value)};
+    }
+  });
+  calcPoints();
+  saveState();
+  showToast('Predicciones guardadas ✓');
+  renderQuiniela();
+}
+
+// ─── BRACKET ────────────────────────────────────────────────────────────
+function renderBracket(){
+  function makeGrid(arr){
+    return arr.map(m=>`<div class="bracket-match">
+      <div class="bracket-team">${m.home}</div>
+      <div class="bracket-vs">vs</div>
+      <div class="bracket-team">${m.away}</div>
+    </div>`).join('');
+  }
+  document.getElementById('bracket16').innerHTML=makeGrid(BRACKET16);
+  document.getElementById('bracket8').innerHTML=makeGrid(BRACKET8);
+  document.getElementById('bracket4').innerHTML=makeGrid(BRACKET4);
+  document.getElementById('bracketFinal').innerHTML=`<div class="bracket-match" style="border:2px solid var(--gold)">
+    <div class="bracket-team bracket-winner">Semi 1</div>
+    <div class="bracket-vs">VS</div>
+    <div class="bracket-team bracket-winner">Semi 2</div>
+  </div>`;
+}
+
+// ─── AUTH ────────────────────────────────────────────────────────────────
+function doLogin(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  const found=S.users.find(x=>x.id===u&&x.pass===p);
+  if(found){S.currentUser=found;saveState();updateProfileUI();renderResults();showToast('Bienvenido, '+found.name+' ✓');}
+  else showToast('Usuario o contraseña incorrectos');
+}
+function doRegister(){
+  const name=document.getElementById('regName').value.trim();
+  const uid=document.getElementById('regUser').value.trim().toLowerCase().replace(/\s+/g,'_');
+  const pass=document.getElementById('regPass').value;
+  if(!name||!uid||!pass){showToast('Completa todos los campos');return;}
+  if(S.users.find(u=>u.id===uid)){showToast('Ese usuario ya existe');return;}
+  const nu={id:uid,name,pass,role:'user',pts:0};
+  S.users.push(nu);S.currentUser=nu;saveState();updateProfileUI();showToast('Cuenta creada ✓ ¡Bienvenido!');
+}
+function doLogout(){S.currentUser=null;saveState();updateProfileUI();renderResults();renderQuiniela();showToast('Sesión cerrada');}
+function showRegister(){document.getElementById('loginForm').style.display='none';document.getElementById('registerForm').style.display='block';}
+function showLogin(){document.getElementById('registerForm').style.display='none';document.getElementById('loginForm').style.display='block';}
+
+// ─── PROFILE UI ─────────────────────────────────────────────────────────
+function updateProfileUI(){
+  const u=S.currentUser;
+  const loggedOut=document.getElementById('profileLoggedOut');
+  const loggedIn=document.getElementById('profileLoggedIn');
+  const adminBadge=document.getElementById('adminBadge');
+  if(u){
+    loggedOut.style.display='none';loggedIn.style.display='block';
+    adminBadge.style.display=u.role==='admin'?'inline':'none';
+    document.getElementById('headerSub').textContent=u.role==='admin'?'Panel de administrador':'Copa del Mundo FIFA 2026';
+    document.getElementById('navAdmin').style.display=u.role==='admin'?'flex':'none';
+    const init=u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('profileAvatar').textContent=init;
+    document.getElementById('profileName').textContent=u.name;
+    document.getElementById('profileRole').textContent=u.role==='admin'?'Administrador':'Miembro del gym';
+    document.getElementById('profilePts').textContent=u.pts+' pts';
+    const preds=S.predictions[u.id]||{};
+    document.getElementById('statPred').textContent=Object.keys(preds).length;
+    let hits=0;
+    Object.keys(preds).forEach(mid=>{const r=S.results[mid];const p=preds[mid];if(r&&r.h===p.h&&r.a===p.a)hits++;});
+    document.getElementById('statHits').textContent=hits;
+    const ranked=[...S.users].filter(x=>x.role!=='admin').sort((a,b)=>b.pts-a.pts);
+    const pos=ranked.findIndex(x=>x.id===u.id)+1;
+    document.getElementById('statRank').textContent='#'+pos;
+  } else {
+    loggedOut.style.display='block';loggedIn.style.display='none';
+    adminBadge.style.display='none';
+    document.getElementById('headerSub').textContent='Copa del Mundo FIFA 2026';
+  }
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ─── PWA INSTALL ─────────────────────────────────────────────────────────
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('installBanner').classList.remove('hidden');
+});
+document.getElementById('btnInstall').addEventListener('click',()=>{
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(()=>{deferredPrompt=null;document.getElementById('installBanner').classList.add('hidden');});}
+});
+document.getElementById('btnDismiss').addEventListener('click',()=>{
+  document.getElementById('installBanner').classList.add('hidden');
+});
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBanner').classList.add('hidden');
+  showToast('¡App instalada con éxito! ⚽');
+});
+
+// ─── ADMIN USERS VIEW ────────────────────────────────────────────────────────
+function renderAdminUsers(){
+  const nonAdmins=S.users.filter(u=>u.role!=='admin');
+  document.getElementById('userCountBadge').textContent=nonAdmins.length+' usuarios';
+  if(!nonAdmins.length){
+    document.getElementById('adminUsersList').innerHTML='<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">No hay usuarios registrados aún</div>';
+    return;
+  }
+  const sorted=[...nonAdmins].sort((a,b)=>b.pts-a.pts);
+  let html='';
+  sorted.forEach((u,idx)=>{
+    const init=u.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    const preds=S.predictions[u.id]||{};
+    const predCount=Object.keys(preds).length;
+    let hits=0,total=0;
+    MATCHES.forEach(m=>{
+      const r=S.results[m.id];
+      const p=preds[m.id];
+      if(r&&p){total++;if(r.h===p.h&&r.a===p.a)hits++;}
+    });
+    const medals=['🥇','🥈','🥉'];
+    const rankLabel=medals[idx]||(idx+1)+'°';
+
+    // Build predictions rows
+    let predRows='';
+    MATCHES.forEach(m=>{
+      const p=preds[m.id];
+      const r=S.results[m.id];
+      let scoreHtml,resultIcon='';
+      if(p){
+        scoreHtml=`<span class="admin-pred-score">${p.h} - ${p.a}</span>`;
+        if(r){
+          const rd=r.h-r.a,pd=p.h-p.a;
+          if(r.h===p.h&&r.a===p.a) resultIcon='<span style="color:var(--green);font-size:11px">+3✓</span>';
+          else if((rd>0&&pd>0)||(rd<0&&pd<0)||(rd===0&&pd===0)) resultIcon='<span style="color:var(--gold);font-size:11px">+1~</span>';
+          else resultIcon='<span style="color:var(--red);font-size:11px">+0✗</span>';
+        }
+      } else {
+        scoreHtml='<span class="admin-pred-score pending">sin pick</span>';
+      }
+      predRows+=`<div class="admin-pred-row">
+        <span class="admin-pred-teams">${m.home} vs ${m.away}</span>
+        ${scoreHtml}
+        ${resultIcon}
+      </div>`;
+    });
+
+    html+=`<div class="admin-user-card">
+      <div class="admin-user-header" onclick="toggleAdminUser('u${u.id}')">
+        <div class="avatar" style="width:34px;height:34px;font-size:12px">${init}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">${rankLabel} ${u.name}</div>
+          <div class="venue-text">@${u.id} · ${predCount}/6 predicciones</div>
+        </div>
+        <span style="font-size:14px;font-weight:700;color:var(--green)">${u.pts} pts</span>
+        <svg class="chevron" id="chev_u${u.id}" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="admin-user-body" id="body_u${u.id}">
+        <div class="admin-stats">
+          <div class="admin-stat"><div class="admin-stat-val">${predCount}</div><div class="admin-stat-lbl">Picks</div></div>
+          <div class="admin-stat"><div class="admin-stat-val" style="color:var(--green)">${hits}</div><div class="admin-stat-lbl">Exactos</div></div>
+          <div class="admin-stat"><div class="admin-stat-val" style="color:var(--gold)">${u.pts}</div><div class="admin-stat-lbl">Puntos</div></div>
+        </div>
+        <div class="admin-section-title">Predicciones partido a partido</div>
+        ${predRows}
+      </div>
+    </div>`;
+  });
+  document.getElementById('adminUsersList').innerHTML=html;
+}
+
+function toggleAdminUser(id){
+  const body=document.getElementById('body_'+id);
+  const chev=document.getElementById('chev_'+id);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────
+loadState();
+calcPoints();
+updateProfileUI();
+renderResults();
+renderGroupTabs();
+renderGroupTable(S.activeGroup);
+renderBracket();
+</script>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js").catch(()=>{});});}</script>
+<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}</script>
+</body>
+</html>
