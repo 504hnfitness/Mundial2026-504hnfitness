@@ -436,14 +436,18 @@ const MATCHES=[
   {id:6,home:'Sudáfrica',away:'Corea del Sur',date:'24 jun',time:'20:00',group:'A',venue:'Estadio BBVA, Monterrey'},
 ];
 const GROUPS={
-  A:['México','Sudáfrica','Corea del Sur','Rep. Checa'],
-  B:['EEUU','Brasil','Ghana','Uruguay'],
-  C:['Argentina','Francia','Australia','Senegal'],
-  D:['España','Alemania','Japón','Marruecos'],
-  E:['Portugal','Bélgica','Túnez','Qatar'],
-  F:['Inglaterra','Países Bajos','Ecuador','Camerún'],
-  G:['Italia','Croatia','México B','Egipto'],
-  H:['Polonia','Colombia','Suiza','Costa Rica'],
+  A:['México','Corea del Sur','Sudáfrica','Rep. Checa'],
+  B:['Canadá','Suiza','Catar','Bosnia-Herzegovina'],
+  C:['EEUU','Uruguay','Panamá','Bolivia'],
+  D:['Argentina','Chile','Perú','Ecuador'],
+  E:['España','Marruecos','Côte d'Ivoire','Georgia'],
+  F:['Francia','Escocia','Haití','Albania'],
+  G:['Brasil','Noruega','Nigeria','Indonesia'],
+  H:['Portugal','Ucrania','Uzbekistán','Argelia'],
+  I:['Inglaterra','Colombia','Nueva Zelanda','Senegal'],
+  J:['Alemania','Japón','Arabia Saudí','Bélgica'],
+  K:['Italia','Croacia','Ghana','Irak'],
+  L:['Países Bajos','Australia','Irán','Egipto'],
 };
 const BRACKET16=[
   {home:'1A',away:'2B'},{home:'1B',away:'2A'},
@@ -849,7 +853,6 @@ renderGroupTabs();
 renderGroupTable(S.activeGroup);
 renderBracket();
 </script>
-<script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("/sw.js").catch(()=>{});});}</script>
 <script>if("serviceWorker"in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});}</script>
 </body>
 </html>
